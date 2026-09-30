@@ -1,25 +1,84 @@
 # Env Studio no macOS
 
-Instalação e configuração do app para Mac com chip Apple (M). O que o produto faz e o formato do `.env` estão no [README da raiz](../README.md).
+Instalação do app para Mac com chip Apple (M) e macOS 14 ou mais novo. O que o produto faz está no [README da raiz](../README.md).
 
-## Requisitos
+O arquivo já vem compilado. Não é preciso instalar Swift nem gerar o DMG.
 
-- macOS 14 ou mais novo
-- Apple Silicon (arm64)
-- Para compilar: Xcode 15+ ou Swift 5.9+ (Command Line Tools)
-- Aba **Conexões** (opcional): AWS CLI v2 e [Session Manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
-- **Testar senha** (opcional): `mysql` ou `psql` no PATH
+## Instalar
 
-## Instalar pelo DMG
+1. Abra a aba [Releases](https://github.com/Festevao/env-studio/releases/tag/v0.1.1) e baixe **EnvStudio-arm64.dmg**.
+2. Abra o DMG.
+3. Arraste **Env Studio** para a pasta **Aplicativos**.
+4. Abra o Launchpad ou a pasta Aplicativos e clique no ícone. Para fixar no Dock, clique com o botão direito no ícone do app aberto e escolha **Opções → Manter no Dock**.
 
-Baixe `EnvStudio-arm64.dmg` no [Release](https://github.com/festevao/env-studio/releases) `v0.1.0`, abra e arraste **Env Studio** para **Aplicativos**.
+Na primeira vez o macOS pode avisar que o app não é notarizado. Clique com o botão direito no ícone **dentro de Aplicativos** e escolha **Abrir**, depois confirme. Isso só acontece uma vez.
 
-O app não é notarizado. Na primeira abertura, se o macOS bloquear:
+Se ainda assim o sistema recusar, no Terminal:
 
-1. Clique com o botão direito no app e escolha **Abrir**, ou
-2. No Terminal: `xattr -dr com.apple.quarantine /Applications/Env\ Studio.app`
+```bash
+xattr -dr com.apple.quarantine "/Applications/Env Studio.app"
+```
 
-## Compilar
+O editor de `.env` abre sem nenhum programa extra. AWS, MySQL e Postgres só entram se você for usar túneis ou **Testar senha**.
+
+## Onde a configuração fica
+
+Nada da sua máquina vai dentro do instalador. O DMG traz só o app e o ícone. Perfil AWS, túneis, tags e pastas nascem no Mac de quem instalou, em `~/Library/Application Support/EnvStudio/`:
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| `connectivity.json` | Profiles, alvos SSM e túneis de dev, hom e prod |
+| `workspace-metadata/` | Tags e vínculo **Túnel SQL** de cada pasta aberta |
+| `managed-workspaces.json` | Pastas que o app acompanha ao gerar token |
+| `active-tunnel-sessions.json` | Túnel aberto pelo app; apagado ao sair com ⌘Q |
+
+A primeira abertura começa com os três ambientes vazios. Use **Adicionar túnel…** e **Configurar…**. **Restaurar defaults** limpa o ambiente selecionado. Não recoloca hosts de ninguém.
+
+Sair com ⌘Q encerra os túneis que o app abriu.
+
+**Adicionar túnel…** cria o mesmo `flag` nos três ambientes. **Editar…** muda host e portas só na aba atual. **Excluir…** remove o `flag` de dev, hom e prod. Túnel indisponível é `remoteHost` vazio; preencha em **Editar…**.
+
+Status: verde (aberto por este app), laranja (porta usada por outro ambiente), amarelo (outro processo; **Copiar PID**), vermelho (fechado). Portas locais iguais entre ambientes permitem um forward por vez. Para os três ao mesmo tempo, use portas distintas (por exemplo `26524`, `26534`, `26544`).
+
+## Programas opcionais
+
+### AWS CLI v2
+
+Necessária para **Login SSO**, **Testar profile** e abrir túnel. Instalador de duplo clique:
+
+[https://awscli.amazonaws.com/AWSCLIV2.pkg](https://awscli.amazonaws.com/AWSCLIV2.pkg)
+
+Abra o pacote e siga o assistente. O app procura `aws` no PATH e também em `/opt/homebrew/bin/aws`.
+
+### Session Manager plugin
+
+Sem este plugin, **Abrir** túnel falha mesmo com a AWS CLI instalada. Instalador de duplo clique (macOS arm64):
+
+[https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/session-manager-plugin.pkg](https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac_arm64/session-manager-plugin.pkg)
+
+### Cliente MySQL (`mysql`) — só para Testar senha
+
+O app procura, nesta ordem: `/opt/homebrew/bin/mysql`, `/usr/local/bin/mysql` e o PATH. O pacote do Homebrew não se coloca sozinho nesse caminho. No Terminal:
+
+```bash
+brew install mysql-client
+brew link --force mysql-client
+```
+
+`brew link --force` só cria o atalho em `/opt/homebrew/bin`. Não instala um servidor MySQL. Feche e abra o Env Studio depois do link.
+
+### Cliente Postgres (`psql`) — só para Testar senha
+
+Mesma ideia, com o pacote `libpq`:
+
+```bash
+brew install libpq
+brew link --force libpq
+```
+
+O atalho fica em `/opt/homebrew/bin/psql`, que é um dos caminhos que o app já consulta.
+
+## Só para quem mexe no código
 
 Na pasta `macos/`:
 
@@ -29,40 +88,19 @@ chmod +x scripts/make-app.sh scripts/make-dmg.sh run.sh
 open dist/EnvStudio.app
 ```
 
-O DMG (não vai para o git; sai no Release):
+DMG local (o arquivo publicado é o do Release, não este):
 
 ```bash
 ./scripts/make-dmg.sh
 ```
 
-Atalho de desenvolvimento, sem empacotar o `.app`:
+Atalho de desenvolvimento: `./run.sh`. Evite `swift run EnvStudio` enquanto edita um `.env`, porque o Terminal pode ficar com o teclado.
 
-```bash
-./run.sh
-```
-
-Evite `swift run EnvStudio` enquanto edita um `.env`: o Terminal pode continuar recebendo o teclado.
-
-Testes, a partir de `macos/`:
+Testes:
 
 ```bash
 swift test
 swift run EnvStudioCoreVerify
 ```
 
-## Onde a configuração fica
-
-Tudo em `~/Library/Application Support/EnvStudio/`. Nada disso é gravado na pasta do projeto.
-
-| Arquivo | Conteúdo |
-|---------|----------|
-| `connectivity.json` | Profiles, alvos SSM e túneis de dev, hom e prod |
-| `workspace-metadata/` | Tags e vínculo **Túnel SQL** de cada pasta aberta |
-| `managed-workspaces.json` | Pastas que o app acompanha ao gerar token |
-| `active-tunnel-sessions.json` | Túnel aberto pelo app; apagado ao sair com ⌘Q |
-
-**Adicionar túnel…** cria o mesmo `flag` nos três ambientes. **Editar…** muda host e portas só na aba atual. **Excluir…** remove o `flag` de dev, hom e prod. Túnel indisponível é `remoteHost` vazio; preencha em **Editar…**.
-
-Status do túnel: verde (aberto por este app), laranja (porta usada por outro ambiente), amarelo (outro processo; **Copiar PID**), vermelho (fechado). Portas locais iguais entre ambientes permitem um forward por vez. Para os três ao mesmo tempo, use portas distintas (por exemplo `26524`, `26534`, `26544`).
-
-Sair do app (⌘Q) encerra os túneis que ele abriu. Encerrar à força pode deixar o processo no ar.
+Requisito para compilar: Xcode 15+ ou Swift 5.9+ (Command Line Tools).

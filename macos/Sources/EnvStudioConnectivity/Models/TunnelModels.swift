@@ -85,7 +85,7 @@ public struct AwsEnvironmentConfig: Codable, Equatable, Sendable {
         awsProfileName: String,
         region: String,
         ssmTargetInstanceId: String,
-        rdsIamUsername: String = "felipi.trindade",
+        rdsIamUsername: String = "",
         rdsCaPath: String = "~/.aws/rds/global-bundle.pem",
         tunnels: [TunnelDefinition] = []
     ) {
