@@ -6,17 +6,19 @@ O arquivo já vem compilado. Não é preciso instalar Swift nem gerar o DMG.
 
 ## Instalar
 
-1. Abra a aba [Releases](https://github.com/Festevao/env-studio/releases/tag/v0.1.1) e baixe **EnvStudio-arm64.dmg**.
+1. Abra a aba [Releases](https://github.com/Festevao/env-studio/releases/tag/v0.1.2) e baixe **EnvStudio-arm64.dmg**.
 2. Abra o DMG.
 3. Arraste **Env Studio** para a pasta **Aplicativos**.
-4. Abra o Launchpad ou a pasta Aplicativos e clique no ícone. Para fixar no Dock, clique com o botão direito no ícone do app aberto e escolha **Opções → Manter no Dock**.
+4. Abra o Launchpad ou a pasta Aplicativos e clique no ícone. O macOS avisa que a Apple não verificou o EnvStudio. Isso é esperado: o app não está na App Store. Vá em **Ajustes do Sistema → Privacidade e Segurança**, role até o aviso do EnvStudio e clique em **Abrir mesmo assim**.
+5. Com o app aberto, clique com o botão direito no ícone do Dock e escolha **Opções → Manter no Dock**.
 
-Na primeira vez o macOS pode avisar que o app não é notarizado. Clique com o botão direito no ícone **dentro de Aplicativos** e escolha **Abrir**, depois confirme. Isso só acontece uma vez.
+O nome do arquivo é `EnvStudio.app`. O rótulo **Env Studio** é só o que o Finder mostra.
 
-Se ainda assim o sistema recusar, no Terminal:
+Se a mensagem for **está danificado** e pedir para mover para o Lixo, o app não está corrompido. No Terminal:
 
 ```bash
-xattr -dr com.apple.quarantine "/Applications/Env Studio.app"
+xattr -dr com.apple.quarantine /Applications/EnvStudio.app
+open /Applications/EnvStudio.app
 ```
 
 O editor de `.env` abre sem nenhum programa extra. AWS, MySQL e Postgres só entram se você for usar túneis ou **Testar senha**.

@@ -6,7 +6,7 @@ Linux e Windows ainda não têm app. O formato do arquivo é o mesmo em todas as
 
 | Plataforma | Estado | Instalação |
 |------------|--------|------------|
-| macOS (Apple Silicon) | disponível | [baixar o DMG](https://github.com/Festevao/env-studio/releases/tag/v0.1.1) e ver [macos/README.md](macos/README.md) |
+| macOS (Apple Silicon) | disponível | [baixar o DMG](https://github.com/Festevao/env-studio/releases/tag/v0.1.2) e ver [macos/README.md](macos/README.md) |
 | Linux | em breve | — |
 | Windows | em breve | — |
 
